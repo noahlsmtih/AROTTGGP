@@ -7,7 +7,7 @@ class GraphGenusFitness:
             pairs = []
             for i in adj_list:
                 for j in adj_list[i]:
-                    if (j, i) not in pairs:  # Ensure no duplicate pairs
+                    if (j, i) not in pairs: 
                         pairs.append((i, j))
             return pairs
 
