@@ -4,11 +4,7 @@ class GraphGenusFitness:
 
     def evaluate(self, state):
         def findOrderedPairs(adj_list):
-            pairs = []
-            for i in adj_list:
-                for j in adj_list[i]:
-                    if (j, i) not in pairs: 
-                        pairs.append((i, j))
+            pairs = [(i,j) for i in range(len(adj_list)) for j in adj_list[i]]
             return pairs
 
         def countFaces(ord_pairs, adj_list):
@@ -23,7 +19,8 @@ class GraphGenusFitness:
                     next_edge = (i[1], next_vertex)
                     if next_edge != face[0]:
                         face.append(next_edge)
-                        ord_pairs.remove(next_edge)
+                        if next_edge in ord_pairs:
+                            ord_pairs.remove(next_edge)
                         i = next_edge
                 faces.append(face)
             return len(faces)
