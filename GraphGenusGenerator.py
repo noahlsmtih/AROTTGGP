@@ -33,5 +33,11 @@ class GraphGenusGenerator:
                         break
 
         adjacency_list = {node: list(g.neighbors(node)) for node in g.nodes()}
-        problem = GraphGenusOpt(length=number_of_nodes, fitness_fn=GraphGenusFitness(adjacency_list=adjacency_list), maximize=False, adjacency_list=g)
+
+        adj_dict = {}
+        for node in g.nodes():
+            adj_list = list(g.neighbors(node))
+            adj_dict[node] = adj_list
+
+        problem = GraphGenusOpt(length=number_of_nodes, fitness_fn=GraphGenusFitness(adjacency_list=adj_dict), maximize=False, adjacency_list=adjacency_list)
         return problem

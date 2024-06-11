@@ -1,6 +1,7 @@
 import numpy as np
 from mlrose_hiive.opt_probs.discrete_opt import DiscreteOpt
 from GraphGenusFitness import GraphGenusFitness
+import copy
 
 class GraphGenusOpt(DiscreteOpt):
     def __init__(self, length=None, fitness_fn=None, maximize=False, max_val=2, adjacency_list=None):
@@ -38,8 +39,16 @@ class GraphGenusOpt(DiscreteOpt):
 
     def find_neighbors(self):
         neighbors = []
-        for i in range(len(self)):
-            neighbor = self.copy()
-            neighbor[i] = 1 - neighbor[i]  # Flip the bit
-            neighbors.append(neighbor)
+        for k in range(len(self.adj_list)):
+            for i in range(len(self.adj_list[k])):
+                for j in range(i+1, len(self.adj_list[k])):
+                    state = copy.deepcopy(self.adj_list)
+                    state[k][i],state[k][j]=state[k][j],state[k][i]
+                    neighbors.append(state)
         return neighbors
+        # for entry in self.state:
+        #     for i in range(len(self.state[entry])):
+        #         for j in range(i+j, len(self.state[entry])):
+        #             state = copy.deepcopy(self.state)
+        #             entry[i],entry[j] = entry[j], entry[i]
+        #             neighbors.append()
