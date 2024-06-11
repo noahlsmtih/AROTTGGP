@@ -25,11 +25,11 @@ class GraphGenusFitness:
                 faces.append(face)
             return len(faces)
 
-        orderedPairs = findOrderedPairs(self.adjacency_list)
+        orderedPairs = findOrderedPairs(state)
 
-        V = len(self.adjacency_list)
-        E = sum([len(self.adjacency_list[i]) for i in range(V)]) / 2
-        F = countFaces(orderedPairs, self.adjacency_list)
+        V = len(state)
+        E = sum([len(state[i]) for i in range(V)]) / 2
+        F = countFaces(orderedPairs, state)
 
         genus = int((2 - (V - E + F)) / 2)
         return genus

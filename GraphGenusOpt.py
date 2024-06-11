@@ -37,12 +37,12 @@ class GraphGenusOpt(DiscreteOpt):
         neighbor[vertex] = 1 - neighbor[vertex]  # Flip the bit
         return neighbor
 
-    def find_neighbors(self):
+    def find_neighbors(self, state):
         neighbors = []
-        for k in range(len(self.adj_list)):
-            for i in range(len(self.adj_list[k])):
-                for j in range(i+1, len(self.adj_list[k])):
-                    state = copy.deepcopy(self.adj_list)
+        for k in range(len(state)):
+            for i in range(len(state[k])):
+                for j in range(i+1, len(state[k])):
+                    state = copy.deepcopy(state)
                     state[k][i],state[k][j]=state[k][j],state[k][i]
                     neighbors.append(state)
         return neighbors
