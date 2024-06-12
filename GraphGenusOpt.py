@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from mlrose_hiive.opt_probs.discrete_opt import DiscreteOpt
 from GraphGenusFitness import GraphGenusFitness
 import copy
@@ -29,7 +30,11 @@ class GraphGenusOpt(DiscreteOpt):
         self.current_iteration = 0
 
     def random(self):
-        return np.random.randint(0, 2, self.length)
+        newstate = self.adj_list
+        for node in newstate:
+            random.shuffle(newstate[node])
+        self.adj_list = newstate
+        return newstate
 
     def random_neighbor(self, state):
         neighbor = state.copy()
