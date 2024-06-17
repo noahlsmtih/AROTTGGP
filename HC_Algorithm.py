@@ -2,7 +2,7 @@ import random
 import time
 import pandas as pd
 
-def hill_climb(problem=None, max_iter=None, seed=None, max_attempts = 25, record_file=None):
+def hill_climb(problem=None, max_iter=None, seed=None, max_attempts=25, record_file=None):
     random.seed(seed)  # Set the seed for reproducibility
     iter = 0
     state = problem.adj_list
@@ -17,7 +17,18 @@ def hill_climb(problem=None, max_iter=None, seed=None, max_attempts = 25, record
     
     while iter < max_iter and attempts < max_attempts:
         neighbors = find_neighbors(state)
-        fitness_list = [fitness_fn(neighbor) for neighbor in neighbors]
+        iteration_start_time = time.time()  # Record the start time for this iteration
+        
+        fitness_times = []
+        fitness_list = []
+        for neighbor in neighbors:
+            fitness_eval_start = time.time()
+            fitness = fitness_fn(neighbor)
+            fitness_eval_end = time.time()
+            fitness_times.append(fitness_eval_end - fitness_eval_start)
+            fitness_list.append(fitness)
+        
+        fitness_time = sum(fitness_times) / len(fitness_times)  # Average time for fitness evaluations
         best_neighbor_fitness = min(fitness_list)
         currentFit = fitness_fn(state)
         
@@ -31,21 +42,29 @@ def hill_climb(problem=None, max_iter=None, seed=None, max_attempts = 25, record
             # Choose a random index from the best_indices
             best_fit_index = random.choice(best_indices)
             state = neighbors[best_fit_index]
+            elapsed_time = time.time() - start_time  # Calculate total elapsed time
             iteration_data.append({
                 'Iteration': iter,
                 'Fitness': fitness_fn(state),
-                'Time': time.time() - start_time,  # Calculate time difference
+                'FitnessEvalTime': fitness_time,
+                'Time': elapsed_time,
                 'State': state
             })
         else:
             break
         iter += 1
     
-    # Ensure the final iteration is included
+    # Final fitness evaluation and timing
+    iteration_start_time = time.time()
+    final_fitness = fitness_fn(state)
+    fitness_time = time.time() - iteration_start_time
+
+    # Ensure the final iteration is included with correct fitness evaluation time
     iteration_data.append({
         'Iteration': iter,
-        'Fitness': fitness_fn(state),
-        'Time': time.time() - start_time,  # Calculate time difference
+        'Fitness': final_fitness,
+        'FitnessEvalTime': fitness_time,  # Record the actual fitness evaluation time
+        'Time': time.time() - start_time,  # Calculate total elapsed time
         'State': state
     })
     
@@ -54,4 +73,4 @@ def hill_climb(problem=None, max_iter=None, seed=None, max_attempts = 25, record
         df_iteration_data = pd.DataFrame(iteration_data)
         df_iteration_data.to_csv(record_file, index=False)
     
-    return fitness_fn(state), state, iteration_data
+    return final_fitness, state, iteration_data

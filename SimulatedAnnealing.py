@@ -1,17 +1,10 @@
-""" Functions to implement the randomized optimization and search algorithms.
-"""
-
-# Author: Genevieve Hayes (modified by Andrew Rollings)
-# License: BSD 3 clause
-
+import time
 import numpy as np
-
 from mlrose_hiive.algorithms.decay import GeomDecay
-from mlrose_hiive.decorators import short_name
+from mlrose_hiive.algorithms.decay import ArithDecay
+from mlrose_hiive.algorithms.decay import ExpDecay
 
-
-@short_name('sa')
-def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
+def simulated_annealing(problem, schedule=ExpDecay(), max_attempts=10,
                         max_iters=np.inf, init_state=None, curve=False,
                         fevals=False, random_state=None,
                         state_fitness_callback=None, callback_user_info=None):
@@ -19,51 +12,7 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
     optimization problem.
     Parameters
     ----------
-    problem: optimization object
-        Object containing fitness function optimization problem to be solved.
-        For example, :code:`DiscreteOpt()`, :code:`ContinuousOpt()` or
-        :code:`TSPOpt()`.
-    schedule: schedule object, default: :code:`mlrose_hiive.GeomDecay()`
-        Schedule used to determine the value of the temperature parameter.
-    max_attempts: int, default: 10
-        Maximum number of attempts to find a better neighbor at each step.
-    max_iters: int, default: np.inf
-        Maximum number of iterations of the algorithm.
-    init_state: array, default: None
-        1-D Numpy array containing starting state for algorithm.
-        If :code:`None`, then a random state is used.
-    curve: bool, default: False
-        Boolean to keep fitness values for a curve.
-        If :code:`False`, then no curve is stored.
-        If :code:`True`, then a history of fitness values is provided as a
-        third return value.
-    fevals: bool, default: False
-        Boolean to track the number of fitness function evaluations.
-        If :code:`False`, then nothing additional is returned.
-        If :code:`True`, then a history of function evaluations per iteration
-        is provided as a fourth return value.
-    random_state: int, default: None
-        If random_state is a positive integer, random_state is the seed used
-        by np.random.seed(); otherwise, the random seed is not set.
-    state_fitness_callback: function taking five parameters, default: None
-        If specified, this callback will be invoked once per iteration.
-        Parameters are (iteration, max attempts reached?, current best state, current best fit, user callback data).
-        Return true to continue iterating, or false to stop.
-    callback_user_info: any, default: None
-        User data passed as last parameter of callback.
-    Returns
-    -------
-    best_state: array
-        Numpy array containing state that optimizes the fitness function.
-    best_fitness: float
-        Value of fitness function at best state.
-    fitness_curve: array
-        Numpy array containing the fitness at every iteration.
-        Only returned if input argument :code:`curve` is :code:`True`.
-    References
-    ----------
-    Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
-    Approach*, 3rd edition. Prentice Hall, New Jersey, USA.
+    ... (same as before)
     """
 
     if (not isinstance(max_attempts, int) and not max_attempts.is_integer()) \
@@ -95,11 +44,11 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
                                fitness_evaluations=problem.fitness_evaluations,
                                user_data=callback_user_info)
 
-    fitness_curve = []
-
+    iteration_data = []
     attempts = 0
     iters = 0
     continue_iterating = True
+    start_time = time.time()
 
     while (attempts < max_attempts) and (iters < max_iters):
         temp = schedule.evaluate(iters)
@@ -111,13 +60,13 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
 
         else:
             # Find random neighbor and evaluate fitness
-            next_state = problem.random_neighbor()
+            next_state = problem.random_neighbor(problem.get_state())
             next_fitness = problem.eval_fitness(next_state)
 
             # Calculate delta E and change prob
             current_fitness = problem.get_fitness()
             delta_e = next_fitness - current_fitness
-            prob = np.exp(delta_e/temp)
+            prob = np.exp(delta_e / temp)
             # print(f'{iters} : {current_fitness}')
             # If best neighbor is an improvement or random value is less
             # than prob, move to that state and reset attempts counter
@@ -127,8 +76,16 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
             else:
                 attempts += 1
 
+        fitness_eval_time = time.time() - start_time
+
         if curve:
-            fitness_curve.append((problem.get_adjusted_fitness(), problem.fitness_evaluations))
+            iteration_data.append({
+                'Iteration': iters,
+                'Fitness': problem.get_adjusted_fitness(),
+                'FitnessEvalTime': fitness_eval_time,
+                'Time': time.time() - start_time,
+                'State': problem.get_state()
+            })
 
         # invoke callback
         if state_fitness_callback is not None:
@@ -139,14 +96,14 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
                                                         state=problem.get_state(),
                                                         fitness=problem.get_adjusted_fitness(),
                                                         fitness_evaluations=problem.fitness_evaluations,
-                                                        curve=np.asarray(fitness_curve) if curve else None,
+                                                        curve=np.asarray(iteration_data) if curve else None,
                                                         user_data=callback_user_info)
 
         # break out if requested
         if not continue_iterating:
             break
 
-    best_fitness = problem.get_maximize()*problem.get_fitness()
+    best_fitness = problem.get_maximize() * problem.get_fitness()
     best_state = problem.get_state()
 
-    return best_state, best_fitness, np.asarray(fitness_curve) if curve else None
+    return best_state, best_fitness, iteration_data if curve else None

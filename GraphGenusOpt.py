@@ -37,9 +37,9 @@ class GraphGenusOpt(DiscreteOpt):
         return newstate
 
     def random_neighbor(self, state):
-        neighbor = state.copy()
-        vertex = np.random.randint(len(state))
-        neighbor[vertex] = 1 - neighbor[vertex]  # Flip the bit
+        neighbor = copy.deepcopy(state)
+        vertex = random.choice(list(neighbor.keys()))
+        random.shuffle(neighbor[vertex])
         return neighbor
 
     def find_neighbors(self, state):
