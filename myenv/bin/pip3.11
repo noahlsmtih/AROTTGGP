@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/noahsmith/Documents/AROTTGGP (Summer Research Project 2024)/AROTTGGP/myenv/bin/python3.11" "$0" "$@"
+'''exec' "/Users/noahsmith/Documents/AROTTGGP (Summer Research Project 2024)/AROTTGGP/myenv/bin/python" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re

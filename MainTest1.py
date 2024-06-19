@@ -1,4 +1,3 @@
-# %%
 import networkx as nx
 import random
 import pandas as pd
@@ -9,7 +8,6 @@ from HC_Algorithm import hill_climb
 from SimulatedAnnealing import simulated_annealing
 from RHC_Algorithm import random_hill_climb
 
-# %%
 seed=random.randint(0, 2**32 - 1)
 max_iter = 10000
 number_of_nodes = 7
@@ -22,8 +20,6 @@ print("Starting State:", problem.adj_list)
 print("Seed:", seed)
 print("Max Iterations:", max_iter)
 
-
-# %%
 # Get the adjacency list (which is a graph object)
 adj_list = problem.adj_list
 graph = nx.Graph(adj_list)
@@ -31,13 +27,6 @@ graph = nx.Graph(adj_list)
 def is_power_of_two(n):
     return (n != 0) and (n & (n - 1)) == 0
 
-# Draw the generated graph
-import matplotlib.pyplot as plt
-nx.draw(graph, with_labels=True, node_color='lightblue', node_size=500, font_size=10, font_weight='bold')
-plt.title("Input Graph for Graph Genus Problem")
-plt.show()
-
-# %%
 def get_best_result(file_path):
     df = pd.read_csv(file_path)
     min_fitness = df['Fitness'].min()
@@ -58,24 +47,17 @@ df_run_stats.to_csv(record_file, index=False)
 # Filter the data to include only the iterations with iter = to a power of 2 and the last one
 filtered_data = df_run_stats[df_run_stats['Iteration'].apply(is_power_of_two) | (df_run_stats['Iteration'] == df_run_stats['Iteration'].max())]
 
-# Convert the filtered data DataFrame to an HTML table and display it
-html_filtered_table = filtered_data.to_html(index=False)
-
-# %%
 # Example usage to get and display the best result
 best_result = get_best_result(record_file)
+print(best_result)
 
 # Convert the best result to a DataFrame
 df_best_result = pd.DataFrame([best_result])
-
-# Convert the DataFrame to an HTML table and display it
-html_best_result_table = df_best_result.to_html(index=False)
 
 # Print final results
 print("Final Fitness:", final_fitness)
 print("Final State:", final_state)
 
-# %%
 def save_best_result(best_result, number_of_nodes, complete_graph, seed, algorithm_name, file_path="best_results.csv"):
     data = {
         'Algorithm': [algorithm_name],
@@ -97,7 +79,7 @@ def save_best_result(best_result, number_of_nodes, complete_graph, seed, algorit
 
 # Example usage:
 file_path = "best_results.csv"  # Change the file path accordingly
-algorithm_name = "Hill Climb"
+algorithm_name = "Hill Climb test"
 # algorithm_name = "Random Hill Climb"
 # algorithm_name = "Simulated Annealing"
 save_best_result(best_result, number_of_nodes, complete_graph, seed, algorithm_name, file_path)

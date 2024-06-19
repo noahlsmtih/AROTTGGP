@@ -4,7 +4,7 @@ from mlrose_hiive.algorithms.decay import GeomDecay
 from mlrose_hiive.algorithms.decay import ArithDecay
 from mlrose_hiive.algorithms.decay import ExpDecay
 
-def simulated_annealing(problem, schedule=ExpDecay(), max_attempts=10,
+def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=25,
                         max_iters=np.inf, init_state=None, curve=False,
                         fevals=False, random_state=None,
                         state_fitness_callback=None, callback_user_info=None):
