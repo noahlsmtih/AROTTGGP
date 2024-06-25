@@ -5,32 +5,36 @@ from GraphGenusFitness import GraphGenusFitness
 
 class GraphGenusGenerator:
     @staticmethod
-    def generate(seed, number_of_nodes=20, max_connections_per_node=4, complete_graph=False):
+    def generate(seed, number_of_nodes=20, max_connections_per_node=4, graph_type=None):
         np.random.seed(seed)
-        
-        if complete_graph:
-            g = nx.complete_graph(number_of_nodes)
-        else:
-            node_connection_counts = 1 + np.random.randint(max_connections_per_node, size=number_of_nodes)
-            node_connections = {}
-            nodes = range(number_of_nodes)
-            for n in nodes:
-                all_other_valid_nodes = [o for o in nodes if (o != n and (o not in node_connections or
-                                                                          n not in node_connections[o]))]
-                count = min(node_connection_counts[n], len(all_other_valid_nodes))
-                other_nodes = sorted(np.random.choice(all_other_valid_nodes, count, replace=False))
-                node_connections[n] = [(n, o) for o in other_nodes]
+        match graph_type:
+            case "complete":
+                g = nx.complete_graph(number_of_nodes)
+            case "complete_bipartite":
+                part1_size = number_of_nodes // 2
+                part2_size = number_of_nodes - part1_size
+                g = nx.complete_bipartite_graph(part1_size, part2_size)
+            case _:
+                node_connection_counts = 1 + np.random.randint(max_connections_per_node, size=number_of_nodes)
+                node_connections = {}
+                nodes = range(number_of_nodes)
+                for n in nodes:
+                    all_other_valid_nodes = [o for o in nodes if (o != n and (o not in node_connections or
+                                                                            n not in node_connections[o]))]
+                    count = min(node_connection_counts[n], len(all_other_valid_nodes))
+                    other_nodes = sorted(np.random.choice(all_other_valid_nodes, count, replace=False))
+                    node_connections[n] = [(n, o) for o in other_nodes]
 
-            g = nx.Graph()
-            g.add_edges_from([x for y in node_connections.values() for x in y])
+                g = nx.Graph()
+                g.add_edges_from([x for y in node_connections.values() for x in y])
 
-            for n in nodes:
-                cannot_reach = [(n, o) if n < o else (o, n) for o in nodes if o not in nx.bfs_tree(g, n).nodes()]
-                for s, f in cannot_reach:
-                    g.add_edge(s, f)
-                    check_reach = len([(n, o) if n < o else (o, n) for o in nodes if o not in nx.bfs_tree(g, n).nodes()])
-                    if check_reach == 0:
-                        break
+                for n in nodes:
+                    cannot_reach = [(n, o) if n < o else (o, n) for o in nodes if o not in nx.bfs_tree(g, n).nodes()]
+                    for s, f in cannot_reach:
+                        g.add_edge(s, f)
+                        check_reach = len([(n, o) if n < o else (o, n) for o in nodes if o not in nx.bfs_tree(g, n).nodes()])
+                        if check_reach == 0:
+                            break
 
         adjacency_list = {node: list(g.neighbors(node)) for node in g.nodes()}
 

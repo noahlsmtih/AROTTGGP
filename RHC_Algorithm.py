@@ -26,11 +26,13 @@ def random_hill_climb(problem, max_attempts=25, max_iters=0, restarts=0, init_st
     fitness_fn = problem.fitness_fn.evaluate
     find_neighbors = problem.find_neighbors
 
+    iter = 0
+
     def hill_climb_single_run(initial_state, max_attempts, max_iters):
         state = initial_state
         best_state = state
         best_fitness = fitness_fn(state)
-        iter = 0
+        nonlocal iter
         attempts = 0
         iteration_data = []
         start_time = time.time()
@@ -79,7 +81,6 @@ def random_hill_climb(problem, max_attempts=25, max_iters=0, restarts=0, init_st
 
     for restart in range(restarts + 1):
         state = problem.random()
-        print("restarted")
         best_state, best_fitness, iteration_data = hill_climb_single_run(state, max_attempts, max_iters)
 
         if best_fitness < overall_best_fitness:
