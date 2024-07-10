@@ -43,5 +43,5 @@ class GraphGenusGenerator:
             adj_list = list(g.neighbors(node))
             adj_dict[node] = adj_list
 
-        problem = GraphGenusOpt(length=number_of_nodes, fitness_fn=GraphGenusFitness(adjacency_list=adj_dict), maximize=False, adjacency_list=adjacency_list)
+        problem = GraphGenusOpt(length=number_of_nodes, fitness_fn=GraphGenusFitness(adjacency_list=adj_dict), maximize=False, adjacency_list=adjacency_list, seed=seed)
         return problem

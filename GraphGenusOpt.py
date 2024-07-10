@@ -5,7 +5,7 @@ from GraphGenusFitness import GraphGenusFitness
 import copy
 
 class GraphGenusOpt(DiscreteOpt):
-    def __init__(self, length=None, fitness_fn=None, maximize=False, max_val=2, adjacency_list=None):
+    def __init__(self, length=None, fitness_fn=None, maximize=False, max_val=2, adjacency_list=None, seed=None):
         if (fitness_fn is None) and (adjacency_list is None):
             raise Exception("At least one of fitness_fn and adjacency_list must be specified.")
         elif fitness_fn is None:
@@ -19,41 +19,42 @@ class GraphGenusOpt(DiscreteOpt):
         
         if self.fitness_fn.get_prob_type() != 'discrete':
             raise Exception("fitness_fn must have problem type 'discrete'.")
-            
+        
+        self.seed = seed
+        if self.seed is not None:
+            np.random.seed(self.seed)
+            random.seed(self.seed)
+
         self.prob_type = 'graph_genus'
 
-    def reset(self):
-        self.state = self.random()
-        self.fitness = self.eval_fitness(self.state)
-        self.fevals = {}
-        self.fitness_evaluations = 0
-        self.current_iteration = 0
-
     def random(self):
-        newstate = self.adj_list
-        for node in newstate:
-            random.shuffle(newstate[node])
-        self.adj_list = newstate
-        return newstate
+        state = copy.deepcopy(self.adj_list)
+        for node in state:
+            lst = state[node]
+            to_shuffle = lst[1:]
+            shuffled_lst = [lst[0]]
+            shuffled_lst.extend(np.random.permutation(to_shuffle))
+            state[node] = shuffled_lst
 
+        return state
+    
     def random_neighbor(self, state):
         neighbor = copy.deepcopy(state)
         vertex = random.choice(list(neighbor.keys()))
-        random.shuffle(neighbor[vertex])
+        to_shuffle = neighbor[vertex][1:]
+        shuffled_lst = [neighbor[vertex][0]]
+        shuffled_lst.extend(np.random.permutation(to_shuffle))
+        neighbor[vertex] = shuffled_lst
+
         return neighbor
 
     def find_neighbors(self, state):
         neighbors = []
-        for k in range(len(state)):
-            for i in range(len(state[k])):
-                for j in range(i+1, len(state[k])):
-                    state = copy.deepcopy(state)
-                    state[k][i],state[k][j]=state[k][j],state[k][i]
-                    neighbors.append(state)
+        for node in state:
+            for i in range(1, len(state[node])):
+                for j in range(i + 1, len(state[node])):
+                    neighbor = copy.deepcopy(state)
+                    neighbor[node][i], neighbor[node][j] = neighbor[node][j], neighbor[node][i]
+                    neighbors.append(neighbor)
+        
         return neighbors
-        # for entry in self.state:
-        #     for i in range(len(self.state[entry])):
-        #         for j in range(i+j, len(self.state[entry])):
-        #             state = copy.deepcopy(self.state)
-        #             entry[i],entry[j] = entry[j], entry[i]
-        #             neighbors.append()
