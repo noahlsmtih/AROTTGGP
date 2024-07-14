@@ -47,6 +47,45 @@ def Genetic_Algorithm(problem, max_attempts=25, max_iters=100, restarts=0, pop_s
     def select_parent(pop, mate_probs):
         parent = random.choices(pop, weights=mate_probs, k=1)[0]
         return parent
+    
+    def rotate_right(lst, k):
+        k = k % len(lst)
+        return lst[-k:] + lst[:-k]
+
+    def mutate(child, mutation_prob):
+        new_child = {}
+
+        for key in child:
+            random_num = random.random()
+            if random_num < mutation_prob:
+                # Determine the indices i and j, and the rotation amount k
+                i = random.randint(0, len(child[key]) - 1)
+                j = random.randint(0, len(child[key]) - 1)
+
+                # Ensure j is different from i
+                while j == i:
+                    j = random.randint(0, len(child[key]) - 1)
+
+                k = random.randint(1, len(child[key]) - 1)  # Number of positions to rotate
+
+                # Create the sublist
+                if i < j:
+                    sublist = child[key][i:j+1]
+                else:
+                    sublist = child[key][i:] + child[key][:j+1]
+
+                # Rotate the sublist to the right by k positions
+                rotated_sublist = rotate_right(sublist, k)
+
+                # Apply the rotated sublist back to the child
+                if i < j:
+                    new_child[key] = child[key][:i] + rotated_sublist + child[key][j+1:]
+                else:
+                    new_child[key] = rotated_sublist[len(child[key]) - i:] + child[key][j+1:i] + rotated_sublist[:len(child[key]) - i]
+            else:
+                new_child[key] = child[key]
+
+        return new_child
 
     def reproduce(parent_1, parent_2, mutation_prob):
         child = {}
@@ -56,6 +95,9 @@ def Genetic_Algorithm(problem, max_attempts=25, max_iters=100, restarts=0, pop_s
                 child[key] = parent_1[key]
             else:             # Use parent_2 for odd keys
                 child[key] = parent_2[key]
+
+        # Mutate the child with the given probability
+        child = mutate(child, mutation_prob)
 
         return child
 

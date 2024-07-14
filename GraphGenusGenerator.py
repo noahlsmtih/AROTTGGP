@@ -13,6 +13,7 @@ class GraphGenusGenerator:
             case "complete_bipartite":
                 part1_size = number_of_nodes // 2
                 part2_size = number_of_nodes - part1_size
+                print(f"K_({part1_size},{part2_size})")
                 g = nx.complete_bipartite_graph(part1_size, part2_size)
             case _:
                 node_connection_counts = 1 + np.random.randint(max_connections_per_node, size=number_of_nodes)
