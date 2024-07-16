@@ -41,7 +41,7 @@ class GraphGenusGenerator:
         return B
 
     @staticmethod
-    def generate(seed, number_of_nodes=20, max_connections_per_node=4, graph_type=None):
+    def generate(seed, number_of_nodes=20, max_connections_per_node=4, graph_type=None, bracket=[1,2,3]):
         np.random.seed(seed)
         match graph_type:
             case "complete":
@@ -52,8 +52,10 @@ class GraphGenusGenerator:
                 print(f"K_({part1_size},{part2_size})")
                 g = nx.complete_bipartite_graph(part1_size, part2_size)
             case "billiards":
-                bracket = GraphGenusGenerator.create_billiard_bracket(number_of_nodes)
-                g = GraphGenusGenerator.make_billiard_graph_integers(bracket)
+                if bracket != None:
+                    g = GraphGenusGenerator.make_billiard_graph_integers(bracket)
+                else:
+                    print(f"Bracket does not exist")
             case _:
                 node_connection_counts = 1 + np.random.randint(max_connections_per_node, size=number_of_nodes)
                 node_connections = {}
